@@ -1,0 +1,14 @@
+[Unit]
+Description=Gunicorn daemon for Sitanet Merchant
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/sitanetmerchant
+ExecStart=/var/www/sitanetmerchant/venv/bin/gunicorn --config /var/www/sitanetmerchant/deployment/gunicorn.conf.py config.wsgi:application
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

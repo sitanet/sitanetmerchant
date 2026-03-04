@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block title %}Transfer - Sitanet Business Wallet{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-send me-2"></i>Transfer Funds</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-light border">
+                    <div class="d-flex justify-content-between">
+                        <span>From Account:</span>
+                        <strong>{{ wallet.account_number }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Account Name:</span>
+                        <strong>{{ wallet.account_name }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Available Balance:</span>
+                        <strong>₦{{ wallet.available_balance|floatformat:2 }}</strong>
+                    </div>
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Transfer Type *</label>
+                        {{ form.transfer_type }}
+                    </div>
+                    
+                    <div class="mb-3" id="bank-field" style="display:none;">
+                        <label class="form-label">Bank Name *</label>
+                        {{ form.beneficiary_bank }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Beneficiary Account Number *</label>
+                        {{ form.beneficiary_account }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Beneficiary Name</label>
+                        {{ form.beneficiary_name }}
+                        <button type="button" class="btn btn-sm btn-outline-secondary mt-1" id="verify-btn" style="display:none;">
+                            <i class="bi bi-search me-1"></i>Verify Account
+                        </button>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Amount *</label>
+                        {{ form.amount }}
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Narration *</label>
+                        {{ form.narration }}
+                    </div>
+                    
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'wallet_detail' pk=wallet.pk %}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send me-2"></i>Transfer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const transferTypeSelect = document.getElementById('id_transfer_type');
+const bankField = document.getElementById('bank-field');
+const verifyBtn = document.getElementById('verify-btn');
+const accountInput = document.getElementById('id_beneficiary_account');
+const nameInput = document.getElementById('id_beneficiary_name');
+
+let verifyTimeout = null;
+
+transferTypeSelect.addEventListener('change', function() {
+    nameInput.value = '';
+    if (this.value === 'external') {
+        bankField.style.display = 'block';
+        verifyBtn.style.display = 'inline-block';
+    } else {
+        bankField.style.display = 'none';
+        verifyBtn.style.display = 'none';
+    }
+});
+
+function verifyAccount() {
+    const transferType = transferTypeSelect.value;
+    const bankCode = document.getElementById('id_beneficiary_bank').value;
+    const accountNumber = accountInput.value;
+    
+    if (transferType === 'internal') {
+        if (accountNumber.length !== 10) return;
+    } else {
+        if (!bankCode || accountNumber.length !== 10) return;
+    }
+    
+    nameInput.value = 'Verifying...';
+    
+    let url = `{% url 'name_enquiry' %}?account_number=${accountNumber}&transfer_type=${transferType}`;
+    if (transferType === 'external') {
+        url += `&bank_code=${bankCode}`;
+    }
+    
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                nameInput.value = data.account_name;
+            } else {
+                nameInput.value = '';
+                alert('Error: ' + (data.error || 'Account not found'));
+            }
+        })
+        .catch(err => {
+            nameInput.value = '';
+            alert('Failed to verify account');
+        });
+}
+
+accountInput.addEventListener('input', function() {
+    nameInput.value = '';
+    clearTimeout(verifyTimeout);
+    if (this.value.length === 10) {
+        verifyTimeout = setTimeout(verifyAccount, 300);
+    }
+});
+
+document.getElementById('id_beneficiary_bank').addEventListener('change', function() {
+    nameInput.value = '';
+    if (accountInput.value.length === 10) {
+        verifyAccount();
+    }
+});
+
+verifyBtn.addEventListener('click', verifyAccount);
+</script>
+{% endblock %}

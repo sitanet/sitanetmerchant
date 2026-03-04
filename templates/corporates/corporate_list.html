@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Corporates - Sitanet Business Wallet{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">Corporates</h4>
+    <a href="{% url 'corporate_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-2"></i>Add Corporate
+    </a>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-6">
+                <input type="text" name="search" class="form-control" placeholder="Search by business name..." value="{{ search }}">
+            </div>
+            <div class="col-md-4">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="PENDING" {% if status == 'PENDING' %}selected{% endif %}>Pending</option>
+                    <option value="ACTIVE" {% if status == 'ACTIVE' %}selected{% endif %}>Active</option>
+                    <option value="SUSPENDED" {% if status == 'SUSPENDED' %}selected{% endif %}>Suspended</option>
+                    <option value="CLOSED" {% if status == 'CLOSED' %}selected{% endif %}>Closed</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-secondary w-100">Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Corporates Table -->
+<div class="card">
+    <div class="card-body">
+        {% if corporates %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Business Name</th>
+                        <th>Type</th>
+                        <th>Registration No.</th>
+                        <th>Contact</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for corporate in corporates %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'corporate_detail' pk=corporate.pk %}" class="text-decoration-none">
+                                <strong>{{ corporate.business_name }}</strong>
+                            </a>
+                            {% if corporate.trading_name %}
+                            <br><small class="text-muted">{{ corporate.trading_name }}</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ corporate.get_business_type_display }}</td>
+                        <td>{{ corporate.registration_number }}</td>
+                        <td>
+                            <small>{{ corporate.email }}</small><br>
+                            <small class="text-muted">{{ corporate.phone_number }}</small>
+                        </td>
+                        <td>
+                            <span class="badge badge-status-{{ corporate.status|lower }}">{{ corporate.status }}</span>
+                        </td>
+                        <td>{{ corporate.created_at|date:"M d, Y" }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'corporate_detail' pk=corporate.pk %}" class="btn btn-outline-primary" title="View">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'corporate_edit' pk=corporate.pk %}" class="btn btn-outline-secondary" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if corporates.has_other_pages %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if corporates.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ corporates.previous_page_number }}&search={{ search }}&status={{ status }}">Previous</a>
+                </li>
+                {% endif %}
+                
+                <li class="page-item disabled">
+                    <span class="page-link">Page {{ corporates.number }} of {{ corporates.paginator.num_pages }}</span>
+                </li>
+                
+                {% if corporates.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ corporates.next_page_number }}&search={{ search }}&status={{ status }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-building display-4 text-muted"></i>
+            <p class="text-muted mt-3">No corporates found.</p>
+            <a href="{% url 'corporate_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-2"></i>Add Corporate
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

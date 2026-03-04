@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Wallets - Sitanet Business Wallet{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">Wallets</h4>
+</div>
+
+<!-- Search -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-10">
+                <input type="text" name="search" class="form-control" placeholder="Search by account number or business name..." value="{{ search }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-secondary w-100">Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Wallets Table -->
+<div class="card">
+    <div class="card-body">
+        {% if wallets %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Account Number</th>
+                        <th>Account Name</th>
+                        <th>Corporate</th>
+                        <th>Available Balance</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for wallet in wallets %}
+                    <tr>
+                        <td><strong>{{ wallet.account_number }}</strong></td>
+                        <td>{{ wallet.account_name }}</td>
+                        <td>
+                            <a href="{% url 'corporate_detail' pk=wallet.corporate.pk %}" class="text-decoration-none">
+                                {{ wallet.corporate.business_name }}
+                            </a>
+                        </td>
+                        <td>₦{{ wallet.available_balance|floatformat:2 }}</td>
+                        <td><span class="badge badge-status-{{ wallet.status|lower }}">{{ wallet.status }}</span></td>
+                        <td>{{ wallet.created_at|date:"M d, Y" }}</td>
+                        <td>
+                            <a href="{% url 'wallet_detail' pk=wallet.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if wallets.has_other_pages %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if wallets.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ wallets.previous_page_number }}&search={{ search }}">Previous</a></li>
+                {% endif %}
+                <li class="page-item disabled"><span class="page-link">Page {{ wallets.number }} of {{ wallets.paginator.num_pages }}</span></li>
+                {% if wallets.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ wallets.next_page_number }}&search={{ search }}">Next</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-wallet display-4 text-muted"></i>
+            <p class="text-muted mt-3">No wallets found.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

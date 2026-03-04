@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Sitanet Business Wallet{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">Dashboard</h4>
+    <a href="{% url 'corporate_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-2"></i>Add Corporate
+    </a>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                        <i class="bi bi-building text-primary fs-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0">{{ corporates_count }}</h3>
+                        <small class="text-muted">Corporates</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-secondary bg-opacity-10 p-3 me-3">
+                        <i class="bi bi-people text-secondary fs-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0">{{ customers_count }}</h3>
+                        <small class="text-muted">Customers</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3">
+                        <i class="bi bi-wallet text-success fs-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0">{{ wallets_count }}</h3>
+                        <small class="text-muted">Total Wallets</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-info bg-opacity-10 p-3 me-3">
+                        <i class="bi bi-check-circle text-info fs-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0">{{ active_wallets }}</h3>
+                        <small class="text-muted">Active Wallets</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Corporates -->
+<div class="card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Recent Corporates</h5>
+        <a href="{% url 'corporate_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="card-body">
+        {% if recent_corporates %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Business Name</th>
+                        <th>Registration No.</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for corporate in recent_corporates %}
+                    <tr>
+                        <td>
+                            <strong>{{ corporate.business_name }}</strong>
+                            {% if corporate.trading_name %}
+                            <br><small class="text-muted">{{ corporate.trading_name }}</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ corporate.registration_number }}</td>
+                        <td>
+                            <span class="badge badge-status-{{ corporate.status|lower }}">{{ corporate.status }}</span>
+                        </td>
+                        <td>{{ corporate.created_at|date:"M d, Y" }}</td>
+                        <td>
+                            <a href="{% url 'corporate_detail' pk=corporate.pk %}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-building display-4 text-muted"></i>
+            <p class="text-muted mt-3">No corporates yet. Create your first corporate entity.</p>
+            <a href="{% url 'corporate_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-2"></i>Add Corporate
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Generate Wallet - Sitanet Business Wallet{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="bi bi-wallet me-2"></i>Add Wallet</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    You are adding a wallet for <strong>{{ corporate.business_name }}</strong>.
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Select Director/Signatory *</label>
+                        {{ form.director }}
+                        <small class="text-muted d-block mt-1">{{ form.director.help_text }}</small>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label d-block">Wallet Option *</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="wallet_option" id="option_generate" value="generate" checked>
+                            <label class="form-check-label" for="option_generate">
+                                <i class="bi bi-plus-circle me-1"></i>Generate New Wallet
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="wallet_option" id="option_existing" value="existing">
+                            <label class="form-check-label" for="option_existing">
+                                <i class="bi bi-link-45deg me-1"></i>Link Existing Wallet
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div id="existing-wallet-fields" style="display: none;">
+                        <div class="card bg-light mb-4">
+                            <div class="card-body">
+                                <h6 class="card-title"><i class="bi bi-info-circle me-2"></i>Existing Wallet Details</h6>
+                                <p class="text-muted small">If the director already has a 9PSB wallet, enter the details below.</p>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Account Number *</label>
+                                        {{ form.existing_account_number }}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Account Name *</label>
+                                        {{ form.existing_account_name }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'corporate_detail' pk=corporate.pk %}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary" id="submit-btn">
+                            <i class="bi bi-wallet me-2"></i>Generate Wallet
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('input[name="wallet_option"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+        const existingFields = document.getElementById('existing-wallet-fields');
+        const submitBtn = document.getElementById('submit-btn');
+        
+        if (this.value === 'existing') {
+            existingFields.style.display = 'block';
+            submitBtn.innerHTML = '<i class="bi bi-link-45deg me-2"></i>Link Wallet';
+        } else {
+            existingFields.style.display = 'none';
+            submitBtn.innerHTML = '<i class="bi bi-wallet me-2"></i>Generate Wallet';
+        }
+    });
+});
+</script>
+{% endblock %}

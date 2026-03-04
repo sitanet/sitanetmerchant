@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block title %}Wallet {{ wallet.account_number }} - Sitanet Business Wallet{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-0">Wallet Details</h4>
+        <small class="text-muted">{{ wallet.corporate.business_name }}</small>
+    </div>
+    <a href="{% url 'corporate_detail' pk=wallet.corporate.pk %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Back to Corporate
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <!-- Wallet Info Card -->
+        <div class="card mb-4">
+            <div class="card-body text-center py-4">
+                <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width:80px;height:80px;">
+                    <i class="bi bi-wallet text-primary display-6"></i>
+                </div>
+                <h5>{{ wallet.account_number }}</h5>
+                <p class="text-muted mb-2">{{ wallet.account_name }}</p>
+                <span class="badge badge-status-{{ wallet.status|lower }}">{{ wallet.status }}</span>
+            </div>
+            <hr class="m-0">
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Available Balance</span>
+                    <strong id="available-balance">₦{{ wallet.available_balance|floatformat:2 }}</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-muted">Ledger Balance</span>
+                    <strong id="ledger-balance">₦{{ wallet.ledger_balance|floatformat:2 }}</strong>
+                </div>
+                <button class="btn btn-outline-primary btn-sm w-100" onclick="refreshBalance()">
+                    <i class="bi bi-arrow-clockwise me-2"></i>Refresh Balance
+                </button>
+            </div>
+            <hr class="m-0">
+            <div class="card-body">
+                <small class="text-muted d-block mb-1">Tier: {{ wallet.tier|default:"N/A" }}</small>
+                <small class="text-muted d-block mb-1">Customer ID: {{ wallet.customer_id|default:"N/A" }}</small>
+                <small class="text-muted d-block">Created: {{ wallet.created_at|date:"M d, Y H:i" }}</small>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="card-header bg-white">
+                <h6 class="mb-0">Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'wallet_credit' pk=wallet.pk %}" class="btn btn-success">
+                        <i class="bi bi-plus-circle me-2"></i>Credit Wallet
+                    </a>
+                    <a href="{% url 'wallet_debit' pk=wallet.pk %}" class="btn btn-danger">
+                        <i class="bi bi-dash-circle me-2"></i>Debit Wallet
+                    </a>
+                    <a href="{% url 'wallet_transfer' pk=wallet.pk %}" class="btn btn-primary">
+                        <i class="bi bi-send me-2"></i>Transfer
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <!-- Recent Transactions -->
+        <div class="card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Recent Transactions</h5>
+                <a href="{% url 'transaction_list' %}?wallet={{ wallet.pk }}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body">
+                {% if transactions %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Narration</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for txn in transactions %}
+                            <tr>
+                                <td>
+                                    {% if txn.transaction_type == 'CREDIT' %}
+                                    <span class="text-success"><i class="bi bi-arrow-down-circle me-1"></i>Credit</span>
+                                    {% elif txn.transaction_type == 'DEBIT' %}
+                                    <span class="text-danger"><i class="bi bi-arrow-up-circle me-1"></i>Debit</span>
+                                    {% else %}
+                                    <span class="text-primary"><i class="bi bi-arrow-left-right me-1"></i>Transfer</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if txn.transaction_type == 'CREDIT' %}
+                                    <span class="text-success">+₦{{ txn.amount|floatformat:2 }}</span>
+                                    {% else %}
+                                    <span class="text-danger">-₦{{ txn.amount|floatformat:2 }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ txn.narration|truncatechars:30 }}</td>
+                                <td>
+                                    <span class="badge {% if txn.status == 'SUCCESS' %}bg-success{% elif txn.status == 'PENDING' %}bg-warning{% else %}bg-danger{% endif %}">
+                                        {{ txn.status }}
+                                    </span>
+                                </td>
+                                <td>{{ txn.created_at|date:"M d, H:i" }}</td>
+                                <td>
+                                    {% if txn.status == 'PENDING' %}
+                                    <a href="{% url 'transaction_requery' pk=txn.pk %}" class="btn btn-sm btn-outline-secondary" title="Requery">
+                                        <i class="bi bi-arrow-repeat"></i>
+                                    </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-receipt display-6 text-muted"></i>
+                    <p class="text-muted mt-2">No transactions yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function refreshBalance() {
+    fetch('{% url "wallet_refresh_balance" pk=wallet.pk %}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('available-balance').textContent = '₦' + parseFloat(data.available_balance).toLocaleString('en-NG', {minimumFractionDigits: 2});
+                document.getElementById('ledger-balance').textContent = '₦' + parseFloat(data.ledger_balance).toLocaleString('en-NG', {minimumFractionDigits: 2});
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(err => alert('Failed to refresh balance'));
+}
+</script>
+{% endblock %}

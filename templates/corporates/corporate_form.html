@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Sitanet Business Wallet{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">{{ title }}</h4>
+    <a href="{% url 'corporate_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Back to List
+    </a>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <!-- Business Information -->
+    <div class="card mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="bi bi-building me-2"></i>Business Information</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Business Name *</label>
+                    {{ form.business_name }}
+                    {% if form.business_name.errors %}<div class="text-danger small">{{ form.business_name.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Trading Name</label>
+                    {{ form.trading_name }}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Business Type *</label>
+                    {{ form.business_type }}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Registration Number *</label>
+                    {{ form.registration_number }}
+                    {% if form.registration_number.errors %}<div class="text-danger small">{{ form.registration_number.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Tax ID (TIN)</label>
+                    {{ form.tax_identification_number }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Nature of Business *</label>
+                    {{ form.nature_of_business }}
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Date Incorporated *</label>
+                    {{ form.date_incorporated }}
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Commencement Date</label>
+                    {{ form.business_commencement_date }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Information -->
+    <div class="card mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="bi bi-telephone me-2"></i>Contact Information</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Email *</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Phone Number *</label>
+                    {{ form.phone_number }}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Website</label>
+                    {{ form.website }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Address -->
+    <div class="card mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="bi bi-geo-alt me-2"></i>Address</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12 mb-3">
+                    <label class="form-label">Address *</label>
+                    {{ form.address }}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">City *</label>
+                    {{ form.city }}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">State *</label>
+                    {{ form.state }}
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label class="form-label">Country</label>
+                    {{ form.country }}
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label class="form-label">Postal Code</label>
+                    {{ form.postal_code }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documents -->
+    <div class="card mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="bi bi-file-earmark me-2"></i>Documents</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">CAC Certificate</label>
+                    {{ form.cac_certificate }}
+                    {% if corporate.cac_certificate %}<small class="text-muted">Current: {{ corporate.cac_certificate.name }}</small>{% endif %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">SCUML Certificate</label>
+                    {{ form.scuml_certificate }}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">TIN Certificate</label>
+                    {{ form.tin_certificate }}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Utility Bill</label>
+                    {{ form.utility_bill }}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">MEMART</label>
+                    {{ form.memart }}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Board Resolution</label>
+                    {{ form.board_resolution }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2">
+        <a href="{% url 'corporate_list' %}" class="btn btn-outline-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-lg me-2"></i>Save Corporate
+        </button>
+    </div>
+</form>
+{% endblock %}

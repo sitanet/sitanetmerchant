@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}Transactions - Sitanet Business Wallet{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">Transactions</h4>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="PENDING" {% if status == 'PENDING' %}selected{% endif %}>Pending</option>
+                    <option value="SUCCESS" {% if status == 'SUCCESS' %}selected{% endif %}>Success</option>
+                    <option value="FAILED" {% if status == 'FAILED' %}selected{% endif %}>Failed</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <select name="type" class="form-select">
+                    <option value="">All Types</option>
+                    <option value="CREDIT" {% if txn_type == 'CREDIT' %}selected{% endif %}>Credit</option>
+                    <option value="DEBIT" {% if txn_type == 'DEBIT' %}selected{% endif %}>Debit</option>
+                    <option value="TRANSFER" {% if txn_type == 'TRANSFER' %}selected{% endif %}>Transfer</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-secondary w-100">Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Transactions Table -->
+<div class="card">
+    <div class="card-body">
+        {% if transactions %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Reference</th>
+                        <th>Type</th>
+                        <th>Wallet</th>
+                        <th>Amount</th>
+                        <th>Narration</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for txn in transactions %}
+                    <tr>
+                        <td><code>{{ txn.transaction_reference|truncatechars:20 }}</code></td>
+                        <td>
+                            {% if txn.transaction_type == 'CREDIT' %}
+                            <span class="text-success"><i class="bi bi-arrow-down-circle"></i> Credit</span>
+                            {% elif txn.transaction_type == 'DEBIT' %}
+                            <span class="text-danger"><i class="bi bi-arrow-up-circle"></i> Debit</span>
+                            {% else %}
+                            <span class="text-primary"><i class="bi bi-arrow-left-right"></i> Transfer</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'wallet_detail' pk=txn.wallet.pk %}">{{ txn.wallet.account_number }}</a>
+                            <br><small class="text-muted">{{ txn.wallet.corporate.business_name|truncatechars:20 }}</small>
+                        </td>
+                        <td>
+                            {% if txn.transaction_type == 'CREDIT' %}
+                            <span class="text-success">+₦{{ txn.amount|floatformat:2 }}</span>
+                            {% else %}
+                            <span class="text-danger">-₦{{ txn.amount|floatformat:2 }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ txn.narration|truncatechars:30 }}</td>
+                        <td>
+                            <span class="badge {% if txn.status == 'SUCCESS' %}bg-success{% elif txn.status == 'PENDING' %}bg-warning{% else %}bg-danger{% endif %}">
+                                {{ txn.status }}
+                            </span>
+                        </td>
+                        <td>{{ txn.created_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            {% if txn.status == 'PENDING' %}
+                            <a href="{% url 'transaction_requery' pk=txn.pk %}" class="btn btn-sm btn-outline-secondary" title="Requery Status">
+                                <i class="bi bi-arrow-repeat"></i>
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if transactions.has_other_pages %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if transactions.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ transactions.previous_page_number }}&status={{ status }}&type={{ txn_type }}">Previous</a></li>
+                {% endif %}
+                <li class="page-item disabled"><span class="page-link">Page {{ transactions.number }} of {{ transactions.paginator.num_pages }}</span></li>
+                {% if transactions.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ transactions.next_page_number }}&status={{ status }}&type={{ txn_type }}">Next</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-receipt display-4 text-muted"></i>
+            <p class="text-muted mt-3">No transactions found.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

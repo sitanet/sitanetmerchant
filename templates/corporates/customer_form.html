@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Sitanet Business Wallet{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">{{ title }}</h4>
+    <a href="{% url 'customer_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-2"></i>Back to List
+    </a>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <!-- Identity Verification -->
+    <div class="card mb-4 border-primary">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-shield-check me-2"></i>Identity Verification (BVN/NIN)</h5>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                Enter BVN or NIN and click <strong>Verify</strong> to auto-populate customer details.
+            </div>
+            <div class="row">
+                <div class="col-md-5 mb-3">
+                    <label class="form-label">BVN *</label>
+                    <div class="input-group">
+                        {{ form.bvn }}
+                        <button type="button" class="btn btn-primary" id="verify-bvn-btn">
+                            <i class="bi bi-shield-check me-1"></i>Verify BVN
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-5 mb-3">
+                    <label class="form-label">NIN</label>
+                    <div class="input-group">
+                        {{ form.nin }}
+                        <button type="button" class="btn btn-secondary" id="verify-nin-btn">
+                            <i class="bi bi-shield-check me-1"></i>Verify NIN
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label class="form-label">ID Type *</label>
+                    {{ form.identification_type }}
+                </div>
+            </div>
+            <div id="verification-status" class="mt-2" style="display:none;"></div>
+        </div>
+    </div>
+
+    <!-- Personal Information -->
+    <div class="card mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="bi bi-person me-2"></i>Personal Information</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">First Name *</label>
+                    {{ form.first_name }}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Last Name *</label>
+                    {{ form.last_name }}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Other Names</label>
+                    {{ form.other_names }}
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Gender *</label>
+                    {{ form.gender }}
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Date of Birth *</label>
+                    {{ form.date_of_birth }}
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Place of Birth *</label>
+                    {{ form.place_of_birth }}
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Nationality</label>
+                    {{ form.nationality }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Information -->
+    <div class="card mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="bi bi-telephone me-2"></i>Contact Information</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Email *</label>
+                    {{ form.email }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Phone Number *</label>
+                    {{ form.phone_number }}
+                </div>
+                <div class="col-12 mb-3">
+                    <label class="form-label">Address *</label>
+                    {{ form.address }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">City *</label>
+                    {{ form.city }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">State</label>
+                    {{ form.state }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Next of Kin -->
+    <div class="card mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="bi bi-person-heart me-2"></i>Next of Kin</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Name *</label>
+                    {{ form.next_of_kin_name }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Phone *</label>
+                    {{ form.next_of_kin_phone }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documents -->
+    <div class="card mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="bi bi-file-earmark me-2"></i>Documents</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Passport Photo</label>
+                    {{ form.passport_photo }}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Signature</label>
+                    {{ form.signature }}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Proof of Address</label>
+                    {{ form.proof_of_address }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">ID Card (Front)</label>
+                    {{ form.id_card_front }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">ID Card (Back)</label>
+                    {{ form.id_card_back }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2">
+        <a href="{% url 'customer_list' %}" class="btn btn-outline-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-lg me-2"></i>Save Customer
+        </button>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showVerificationStatus(message, isSuccess) {
+    const statusDiv = document.getElementById('verification-status');
+    statusDiv.style.display = 'block';
+    statusDiv.className = 'alert ' + (isSuccess ? 'alert-success' : 'alert-danger');
+    statusDiv.innerHTML = '<i class="bi bi-' + (isSuccess ? 'check-circle' : 'exclamation-circle') + ' me-2"></i>' + message;
+}
+
+function populateForm(data) {
+    console.log('Populating form with data:', data);
+    
+    const setField = (id, value) => {
+        const el = document.getElementById(id);
+        if (el && value) {
+            el.value = value;
+            console.log(`Set ${id} to:`, value);
+        }
+    };
+    
+    setField('id_first_name', data.first_name);
+    setField('id_last_name', data.last_name);
+    setField('id_other_names', data.other_names);
+    setField('id_phone_number', data.phone_number);
+    setField('id_email', data.email);
+    setField('id_address', data.address);
+    setField('id_city', data.city);
+    setField('id_place_of_birth', data.place_of_birth);
+    
+    if (data.gender) {
+        const genderSelect = document.getElementById('id_gender');
+        if (genderSelect) {
+            const genderValue = data.gender.toUpperCase();
+            for (let option of genderSelect.options) {
+                if (option.value === genderValue || 
+                    (option.value === 'MALE' && (genderValue === 'M' || genderValue.includes('MALE'))) || 
+                    (option.value === 'FEMALE' && (genderValue === 'F' || genderValue.includes('FEMALE')))) {
+                    option.selected = true;
+                    console.log('Set gender to:', option.value);
+                    break;
+                }
+            }
+        }
+    }
+    
+    if (data.date_of_birth) {
+        let dob = data.date_of_birth;
+        // Handle various date formats and convert to YYYY-MM-DD
+        if (dob.includes('/')) {
+            // DD/MM/YYYY or MM/DD/YYYY format
+            const parts = dob.split('/');
+            if (parts.length === 3) {
+                dob = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+            }
+        }
+        if (dob.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            setField('id_date_of_birth', dob);
+        } else {
+            console.log('Could not parse date:', data.date_of_birth);
+        }
+    }
+}
+
+document.getElementById('verify-bvn-btn').addEventListener('click', function() {
+    const bvn = document.getElementById('id_bvn').value.trim();
+    if (!bvn || bvn.length !== 11) {
+        showVerificationStatus('BVN must be exactly 11 digits', false);
+        return;
+    }
+    
+    this.disabled = true;
+    this.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Verifying...';
+    
+    fetch(`{% url 'verify_bvn' %}?bvn=${bvn}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                populateForm(data.data);
+                showVerificationStatus('BVN verified! Form populated with verified details.', true);
+            } else {
+                showVerificationStatus('BVN verification failed: ' + data.error, false);
+            }
+        })
+        .catch(err => showVerificationStatus('Error: ' + err, false))
+        .finally(() => {
+            this.disabled = false;
+            this.innerHTML = '<i class="bi bi-shield-check me-1"></i>Verify BVN';
+        });
+});
+
+document.getElementById('verify-nin-btn').addEventListener('click', function() {
+    const nin = document.getElementById('id_nin').value.trim();
+    if (!nin || nin.length !== 11) {
+        showVerificationStatus('NIN must be exactly 11 digits', false);
+        return;
+    }
+    
+    this.disabled = true;
+    this.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Verifying...';
+    
+    fetch(`{% url 'verify_nin' %}?nin=${nin}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                populateForm(data.data);
+                showVerificationStatus('NIN verified! Form populated with verified details.', true);
+            } else {
+                showVerificationStatus('NIN verification failed: ' + data.error, false);
+            }
+        })
+        .catch(err => showVerificationStatus('Error: ' + err, false))
+        .finally(() => {
+            this.disabled = false;
+            this.innerHTML = '<i class="bi bi-shield-check me-1"></i>Verify NIN';
+        });
+});
+</script>
+{% endblock %}
