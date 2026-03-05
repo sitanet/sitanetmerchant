@@ -22,6 +22,9 @@ class NPSBAPIError(Exception):
 class NPSBService:
     """9PSB Wallet As A Service API Client"""
     
+    # Request timeout in seconds (connect timeout, read timeout)
+    DEFAULT_TIMEOUT = (10, 30)
+    
     def __init__(self):
         self.base_url = settings.NPSB_BASE_URL
         self.username = settings.NPSB_USERNAME
@@ -78,7 +81,7 @@ class NPSBService:
         logger.debug(f"Auth payload (username: {self.username}, clientId: {self.client_id})")
         
         try:
-            response = requests.post(url, json=payload, headers=self._get_headers(include_auth=False))
+            response = requests.post(url, json=payload, headers=self._get_headers(include_auth=False), timeout=self.DEFAULT_TIMEOUT)
             
             logger.info(f"Auth response status code: {response.status_code}")
             logger.info(f"Auth response body: {response.text}")
@@ -303,8 +306,11 @@ class NPSBService:
         params = {'tin': tin}
         
         try:
-            response = requests.get(url, params=params, headers=self._get_headers())
+            response = requests.get(url, params=params, headers=self._get_headers(), timeout=self.DEFAULT_TIMEOUT)
             return self._handle_response(response)
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            logger.error(f"Get corporate status connection error: {str(e)}")
+            raise  # Re-raise to allow retry at caller level
         except requests.RequestException as e:
             logger.error(f"Get corporate status error: {str(e)}")
             raise NPSBAPIError(f"Connection error: {str(e)}")

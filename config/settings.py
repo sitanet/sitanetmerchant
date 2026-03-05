@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Third party
     'rest_framework',
+    'django_apscheduler',
     # Local apps
     'core',
     'corporates',
@@ -130,6 +131,13 @@ REST_FRAMEWORK = {
 # Login URL
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
+
+# APScheduler Configuration
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+APSCHEDULER_RUN_NOW_TIMEOUT = 25
+
+# Polling interval for corporate status check (in seconds)
+CORPORATE_STATUS_POLL_INTERVAL = config('CORPORATE_STATUS_POLL_INTERVAL', default=180, cast=int)
 
 # Logging Configuration
 LOGGING = {
