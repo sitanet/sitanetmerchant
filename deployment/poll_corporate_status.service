@@ -1,0 +1,20 @@
+[Unit]
+Description=Sitanet Corporate Status Polling Service
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/sitanetmerchant
+Environment="PATH=/var/www/sitanetmerchant/venv/bin"
+ExecStart=/var/www/sitanetmerchant/venv/bin/python manage.py poll_corporate_status --daemon
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=append:/var/log/sitanet/poll_corporate_status.log
+StandardError=append:/var/log/sitanet/poll_corporate_status.log
+
+[Install]
+WantedBy=multi-user.target
