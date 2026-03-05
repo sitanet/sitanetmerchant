@@ -74,20 +74,29 @@ class NPSBService:
             "clientSecret": self.client_secret
         }
         
+        logger.info(f"Authenticating with 9PSB API at {url}")
+        logger.debug(f"Auth payload (username: {self.username}, clientId: {self.client_id})")
+        
         try:
             response = requests.post(url, json=payload, headers=self._get_headers(include_auth=False))
+            
+            logger.info(f"Auth response status code: {response.status_code}")
+            logger.info(f"Auth response body: {response.text}")
+            
             data = self._handle_response(response)
             
             if data.get('message') == 'successful':
                 token = data.get('accessToken')
                 expires_in = int(data.get('expiresIn', 3600))
                 cache.set('npsb_access_token', token, timeout=expires_in - 60)
+                logger.info("Authentication successful, token cached")
                 return token
             else:
+                logger.error(f"Authentication failed. Response: {data}")
                 raise NPSBAPIError("Authentication failed", data=data)
                 
         except requests.RequestException as e:
-            logger.error(f"Authentication error: {str(e)}")
+            logger.error(f"Authentication connection error: {str(e)}")
             raise NPSBAPIError(f"Connection error: {str(e)}")
     
     def generate_reference(self, prefix='TXN'):
