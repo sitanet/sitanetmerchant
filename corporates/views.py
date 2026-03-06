@@ -200,6 +200,7 @@ def wallet_generate(request, corporate_pk):
     """Submit corporate account to 9PSB for verification and wallet creation"""
     corporate = get_object_or_404(Corporate, pk=corporate_pk)
     directors = corporate.directors.all()
+    form = WalletGenerationForm(corporate, request.POST or None)
     
     if request.method == 'POST':
         wallet_option = request.POST.get('wallet_option', 'new')
@@ -310,6 +311,7 @@ def wallet_generate(request, corporate_pk):
     return render(request, 'corporates/wallet_generate.html', {
         'corporate': corporate,
         'directors': directors,
+        'form': form,
         'has_required_docs': bool(corporate.tax_identification_number and corporate.cac_certificate),
     })
 
