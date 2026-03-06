@@ -123,8 +123,9 @@ class WalletGenerationForm(forms.Form):
     
     director = forms.ModelChoiceField(
         queryset=Director.objects.none(),
+        required=False,
         widget=forms.Select(attrs={'class': 'form-select'}),
-        help_text='Select the primary director/signatory for this wallet'
+        help_text='Select the primary director/signatory for this wallet (optional)'
     )
     
     existing_account_number = forms.CharField(
