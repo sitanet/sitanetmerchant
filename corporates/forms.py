@@ -45,7 +45,7 @@ class CorporateForm(forms.ModelForm):
             'address', 'city', 'state', 'country', 'postal_code',
             'nature_of_business', 'date_incorporated', 'business_commencement_date',
             'cac_certificate', 'scuml_certificate', 'tin_certificate',
-            'utility_bill', 'memart', 'board_resolution'
+            'utility_bill', 'memart', 'board_resolution', 'cac_status_report', 'proof_of_address'
         ]
         widgets = {
             'business_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Business Name'}),
@@ -70,6 +70,8 @@ class CorporateForm(forms.ModelForm):
             'utility_bill': forms.FileInput(attrs={'class': 'form-control'}),
             'memart': forms.FileInput(attrs={'class': 'form-control'}),
             'board_resolution': forms.FileInput(attrs={'class': 'form-control'}),
+            'cac_status_report': forms.FileInput(attrs={'class': 'form-control'}),
+            'proof_of_address': forms.FileInput(attrs={'class': 'form-control'}),
         }
 
 
