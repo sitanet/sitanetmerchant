@@ -287,10 +287,6 @@ def wallet_generate(request, corporate_pk):
                 if not corporate.registration_number:
                     missing_items.append('Registration Number (RC/BN)')
                 
-                # Validate TIN format (should contain hyphen, e.g., 12345678-0001)
-                if corporate.tax_identification_number and '-' not in corporate.tax_identification_number:
-                    validation_errors.append('TIN format should be like 12345678-0001 (with hyphen)')
-                
                 # Validate dates
                 from datetime import date
                 today = date.today()
