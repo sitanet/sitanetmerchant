@@ -24,6 +24,8 @@ class NPSBService:
     
     # Request timeout in seconds (connect timeout, read timeout)
     DEFAULT_TIMEOUT = (10, 30)
+    # Longer timeout for file uploads
+    UPLOAD_TIMEOUT = (30, 120)
     
     def __init__(self):
         self.base_url = settings.NPSB_BASE_URL
@@ -211,7 +213,7 @@ class NPSBService:
             logger.info(f"Submitting corporate data to {url}")
             logger.debug(f"Corporate data: {data}")
             logger.debug(f"Files: {list(files.keys())}")
-            response = requests.post(url, data=data, files=files, headers=headers, timeout=self.DEFAULT_TIMEOUT)
+            response = requests.post(url, data=data, files=files, headers=headers, timeout=self.UPLOAD_TIMEOUT)
             logger.info(f"Corporate submit response status: {response.status_code}")
             logger.info(f"Corporate submit response body: {response.text}")
             return self._handle_response(response)
@@ -297,7 +299,7 @@ class NPSBService:
         
         try:
             headers = {'Authorization': f'Bearer {self.token}'}
-            response = requests.post(url, data=data, files=files, headers=headers)
+            response = requests.post(url, data=data, files=files, headers=headers, timeout=self.UPLOAD_TIMEOUT)
             return self._handle_response(response)
         except requests.RequestException as e:
             logger.error(f"Update corporate data error: {str(e)}")
