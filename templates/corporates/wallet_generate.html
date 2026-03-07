@@ -15,6 +15,43 @@
                     You are adding a wallet for <strong>{{ corporate.business_name }}</strong>.
                 </div>
                 
+                {% if missing_corporate_docs or missing_director_docs %}
+                <div class="alert alert-warning">
+                    <h6 class="alert-heading"><i class="bi bi-exclamation-triangle me-2"></i>Missing Required Documents</h6>
+                    <p class="mb-2">The following items are required before submitting to 9PSB:</p>
+                    
+                    {% if missing_corporate_docs %}
+                    <strong>Corporate Documents:</strong>
+                    <ul class="mb-2">
+                        {% for doc in missing_corporate_docs %}
+                        <li>{{ doc }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    
+                    {% if missing_director_docs %}
+                    <strong>Director Documents:</strong>
+                    <ul class="mb-0">
+                        {% for director in missing_director_docs %}
+                        <li><strong>{{ director.name }}:</strong> {{ director.missing|join:", " }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                    
+                    <hr>
+                    <p class="mb-0">
+                        <a href="{% url 'corporate_edit' pk=corporate.pk %}" class="btn btn-sm btn-warning">
+                            <i class="bi bi-pencil me-1"></i>Edit Corporate
+                        </a>
+                        {% for director in directors %}
+                        <a href="{% url 'director_edit' pk=director.pk %}" class="btn btn-sm btn-outline-warning ms-1">
+                            Edit {{ director.first_name }}
+                        </a>
+                        {% endfor %}
+                    </p>
+                </div>
+                {% endif %}
+                
                 <form method="post">
                     {% csrf_token %}
                     

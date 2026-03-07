@@ -275,12 +275,50 @@ def wallet_generate(request, corporate_pk):
             
             else:
                 # Submit new corporate account to 9PSB
+                # Validate required fields and documents
+                missing_items = []
+                
+                # Corporate required fields
                 if not directors.exists():
-                    messages.error(request, 'Corporate must have at least one director.')
-                elif not corporate.tax_identification_number:
-                    messages.error(request, 'Tax Identification Number (TIN) is required.')
-                elif not corporate.cac_certificate:
-                    messages.error(request, 'CAC Certificate document is required.')
+                    missing_items.append('At least one director')
+                if not corporate.tax_identification_number:
+                    missing_items.append('Tax Identification Number (TIN)')
+                if not corporate.registration_number:
+                    missing_items.append('Registration Number (RC/BN)')
+                
+                # Corporate required documents
+                if not corporate.cac_certificate:
+                    missing_items.append('CAC Certificate')
+                if not corporate.scuml_certificate:
+                    missing_items.append('SCUML Certificate')
+                if not corporate.memart:
+                    missing_items.append('Memart Document')
+                if not corporate.tin_certificate:
+                    missing_items.append('TIN Certificate')
+                if not corporate.cac_status_report:
+                    missing_items.append('CAC Status Report')
+                if not corporate.board_resolution:
+                    missing_items.append('Board Resolution Letter')
+                if not corporate.utility_bill:
+                    missing_items.append('Utility Bill')
+                if not corporate.proof_of_address:
+                    missing_items.append('Proof of Address')
+                
+                # Director required documents
+                for director in directors:
+                    if not director.bvn:
+                        missing_items.append(f'Director {director.full_name}: BVN')
+                    if not director.nin:
+                        missing_items.append(f'Director {director.full_name}: NIN')
+                    if not director.passport_photo:
+                        missing_items.append(f'Director {director.full_name}: Passport Photo')
+                    if not director.id_card_front:
+                        missing_items.append(f'Director {director.full_name}: ID Card Front')
+                    if not director.proof_of_address:
+                        missing_items.append(f'Director {director.full_name}: Proof of Address')
+                
+                if missing_items:
+                    messages.error(request, f'Missing required items: {", ".join(missing_items)}')
                 else:
                     # Set contact person from primary director if not set
                     primary_director = directors.filter(is_primary=True).first() or directors.first()
@@ -308,11 +346,53 @@ def wallet_generate(request, corporate_pk):
         except Exception as e:
             messages.error(request, f'Error: {str(e)}')
     
+    # Check missing documents for display
+    missing_corporate_docs = []
+    missing_director_docs = []
+    
+    if not corporate.tax_identification_number:
+        missing_corporate_docs.append('Tax Identification Number (TIN)')
+    if not corporate.registration_number:
+        missing_corporate_docs.append('Registration Number (RC/BN)')
+    if not corporate.cac_certificate:
+        missing_corporate_docs.append('CAC Certificate')
+    if not corporate.scuml_certificate:
+        missing_corporate_docs.append('SCUML Certificate')
+    if not corporate.memart:
+        missing_corporate_docs.append('Memart Document')
+    if not corporate.tin_certificate:
+        missing_corporate_docs.append('TIN Certificate')
+    if not corporate.cac_status_report:
+        missing_corporate_docs.append('CAC Status Report')
+    if not corporate.board_resolution:
+        missing_corporate_docs.append('Board Resolution Letter')
+    if not corporate.utility_bill:
+        missing_corporate_docs.append('Utility Bill')
+    if not corporate.proof_of_address:
+        missing_corporate_docs.append('Proof of Address')
+    
+    for director in directors:
+        director_missing = []
+        if not director.bvn:
+            director_missing.append('BVN')
+        if not director.nin:
+            director_missing.append('NIN')
+        if not director.passport_photo:
+            director_missing.append('Passport Photo')
+        if not director.id_card_front:
+            director_missing.append('ID Card Front')
+        if not director.proof_of_address:
+            director_missing.append('Proof of Address')
+        if director_missing:
+            missing_director_docs.append({'name': director.full_name, 'missing': director_missing})
+    
     return render(request, 'corporates/wallet_generate.html', {
         'corporate': corporate,
         'directors': directors,
         'form': form,
-        'has_required_docs': bool(corporate.tax_identification_number and corporate.cac_certificate),
+        'has_required_docs': not missing_corporate_docs and not missing_director_docs,
+        'missing_corporate_docs': missing_corporate_docs,
+        'missing_director_docs': missing_director_docs,
     })
 
 
