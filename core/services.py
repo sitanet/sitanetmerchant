@@ -208,7 +208,12 @@ class NPSBService:
         
         try:
             headers = {'Authorization': f'Bearer {self.token}'}
-            response = requests.post(url, data=data, files=files, headers=headers)
+            logger.info(f"Submitting corporate data to {url}")
+            logger.debug(f"Corporate data: {data}")
+            logger.debug(f"Files: {list(files.keys())}")
+            response = requests.post(url, data=data, files=files, headers=headers, timeout=self.DEFAULT_TIMEOUT)
+            logger.info(f"Corporate submit response status: {response.status_code}")
+            logger.info(f"Corporate submit response body: {response.text}")
             return self._handle_response(response)
         except requests.RequestException as e:
             logger.error(f"Submit corporate data error: {str(e)}")
