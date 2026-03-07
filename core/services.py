@@ -3,11 +3,28 @@
 """
 import requests
 import logging
+import mimetypes
 from datetime import datetime
 from django.conf import settings
 from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
+
+
+def get_content_type(file_field):
+    """Get content type from file field based on extension"""
+    if not file_field:
+        return None
+    filename = file_field.name.lower()
+    if filename.endswith('.pdf'):
+        return 'application/pdf'
+    elif filename.endswith(('.jpg', '.jpeg')):
+        return 'image/jpeg'
+    elif filename.endswith('.png'):
+        return 'image/png'
+    else:
+        content_type, _ = mimetypes.guess_type(filename)
+        return content_type or 'application/octet-stream'
 
 
 class NPSBAPIError(Exception):
@@ -161,23 +178,23 @@ class NPSBService:
         
         # Corporate documents
         if corporate.cac_certificate:
-            files['cacCertificate'] = (corporate.cac_certificate.name, corporate.cac_certificate.file, 'application/pdf')
+            files['cacCertificate'] = (corporate.cac_certificate.name, corporate.cac_certificate.file, get_content_type(corporate.cac_certificate))
         if corporate.scuml_certificate:
-            files['scumlCertificate'] = (corporate.scuml_certificate.name, corporate.scuml_certificate.file, 'application/pdf')
+            files['scumlCertificate'] = (corporate.scuml_certificate.name, corporate.scuml_certificate.file, get_content_type(corporate.scuml_certificate))
         if corporate.regulatory_license_fintech:
-            files['regulatoryLicenseFintech'] = (corporate.regulatory_license_fintech.name, corporate.regulatory_license_fintech.file, 'application/pdf')
+            files['regulatoryLicenseFintech'] = (corporate.regulatory_license_fintech.name, corporate.regulatory_license_fintech.file, get_content_type(corporate.regulatory_license_fintech))
         if corporate.utility_bill:
-            files['utilityBill'] = (corporate.utility_bill.name, corporate.utility_bill.file, 'application/pdf')
+            files['utilityBill'] = (corporate.utility_bill.name, corporate.utility_bill.file, get_content_type(corporate.utility_bill))
         if corporate.proof_of_address:
-            files['proofOfAddressVerification'] = (corporate.proof_of_address.name, corporate.proof_of_address.file, 'application/pdf')
+            files['proofOfAddressVerification'] = (corporate.proof_of_address.name, corporate.proof_of_address.file, get_content_type(corporate.proof_of_address))
         if corporate.memart:
-            files['memart'] = (corporate.memart.name, corporate.memart.file, 'application/pdf')
+            files['memart'] = (corporate.memart.name, corporate.memart.file, get_content_type(corporate.memart))
         if corporate.tin_certificate:
-            files['tinCertificate'] = (corporate.tin_certificate.name, corporate.tin_certificate.file, 'application/pdf')
+            files['tinCertificate'] = (corporate.tin_certificate.name, corporate.tin_certificate.file, get_content_type(corporate.tin_certificate))
         if corporate.cac_status_report:
-            files['cacOrStatusReport'] = (corporate.cac_status_report.name, corporate.cac_status_report.file, 'application/pdf')
+            files['cacOrStatusReport'] = (corporate.cac_status_report.name, corporate.cac_status_report.file, get_content_type(corporate.cac_status_report))
         if corporate.board_resolution:
-            files['letterOfBoardResolution'] = (corporate.board_resolution.name, corporate.board_resolution.file, 'application/pdf')
+            files['letterOfBoardResolution'] = (corporate.board_resolution.name, corporate.board_resolution.file, get_content_type(corporate.board_resolution))
         
         # Directors data
         for i, director in enumerate(directors):
@@ -200,13 +217,13 @@ class NPSBService:
             
             # Director documents
             if director.passport_photo:
-                files[f'directors[{i}].passportPhoto'] = (director.passport_photo.name, director.passport_photo.file, 'image/jpeg')
+                files[f'directors[{i}].passportPhoto'] = (director.passport_photo.name, director.passport_photo.file, get_content_type(director.passport_photo))
             if director.proof_of_address:
-                files[f'directors[{i}].proofOfAddressVerification'] = (director.proof_of_address.name, director.proof_of_address.file, 'application/pdf')
+                files[f'directors[{i}].proofOfAddressVerification'] = (director.proof_of_address.name, director.proof_of_address.file, get_content_type(director.proof_of_address))
             if director.id_card_front:
-                files[f'directors[{i}].idCardFront'] = (director.id_card_front.name, director.id_card_front.file, 'application/pdf')
+                files[f'directors[{i}].idCardFront'] = (director.id_card_front.name, director.id_card_front.file, get_content_type(director.id_card_front))
             if director.id_card_back:
-                files[f'directors[{i}].idCardBack'] = (director.id_card_back.name, director.id_card_back.file, 'application/pdf')
+                files[f'directors[{i}].idCardBack'] = (director.id_card_back.name, director.id_card_back.file, get_content_type(director.id_card_back))
         
         try:
             headers = {'Authorization': f'Bearer {self.token}'}
@@ -250,23 +267,23 @@ class NPSBService:
         
         # Corporate documents
         if corporate.cac_certificate:
-            files['cacCertificate'] = (corporate.cac_certificate.name, corporate.cac_certificate.file, 'application/pdf')
+            files['cacCertificate'] = (corporate.cac_certificate.name, corporate.cac_certificate.file, get_content_type(corporate.cac_certificate))
         if corporate.scuml_certificate:
-            files['scumlCertificate'] = (corporate.scuml_certificate.name, corporate.scuml_certificate.file, 'application/pdf')
+            files['scumlCertificate'] = (corporate.scuml_certificate.name, corporate.scuml_certificate.file, get_content_type(corporate.scuml_certificate))
         if corporate.regulatory_license_fintech:
-            files['regulatoryLicenseFintech'] = (corporate.regulatory_license_fintech.name, corporate.regulatory_license_fintech.file, 'application/pdf')
+            files['regulatoryLicenseFintech'] = (corporate.regulatory_license_fintech.name, corporate.regulatory_license_fintech.file, get_content_type(corporate.regulatory_license_fintech))
         if corporate.utility_bill:
-            files['utilityBill'] = (corporate.utility_bill.name, corporate.utility_bill.file, 'application/pdf')
+            files['utilityBill'] = (corporate.utility_bill.name, corporate.utility_bill.file, get_content_type(corporate.utility_bill))
         if corporate.proof_of_address:
-            files['proofOfAddressVerification'] = (corporate.proof_of_address.name, corporate.proof_of_address.file, 'application/pdf')
+            files['proofOfAddressVerification'] = (corporate.proof_of_address.name, corporate.proof_of_address.file, get_content_type(corporate.proof_of_address))
         if corporate.memart:
-            files['memart'] = (corporate.memart.name, corporate.memart.file, 'application/pdf')
+            files['memart'] = (corporate.memart.name, corporate.memart.file, get_content_type(corporate.memart))
         if corporate.tin_certificate:
-            files['tinCertificate'] = (corporate.tin_certificate.name, corporate.tin_certificate.file, 'application/pdf')
+            files['tinCertificate'] = (corporate.tin_certificate.name, corporate.tin_certificate.file, get_content_type(corporate.tin_certificate))
         if corporate.cac_status_report:
-            files['cacOrStatusReport'] = (corporate.cac_status_report.name, corporate.cac_status_report.file, 'application/pdf')
+            files['cacOrStatusReport'] = (corporate.cac_status_report.name, corporate.cac_status_report.file, get_content_type(corporate.cac_status_report))
         if corporate.board_resolution:
-            files['letterOfBoardResolution'] = (corporate.board_resolution.name, corporate.board_resolution.file, 'application/pdf')
+            files['letterOfBoardResolution'] = (corporate.board_resolution.name, corporate.board_resolution.file, get_content_type(corporate.board_resolution))
         
         # Directors data
         for i, director in enumerate(directors):
@@ -289,13 +306,13 @@ class NPSBService:
             
             # Director documents
             if director.passport_photo:
-                files[f'directors[{i}].passportPhoto'] = (director.passport_photo.name, director.passport_photo.file, 'image/jpeg')
+                files[f'directors[{i}].passportPhoto'] = (director.passport_photo.name, director.passport_photo.file, get_content_type(director.passport_photo))
             if director.proof_of_address:
-                files[f'directors[{i}].proofOfAddressVerification'] = (director.proof_of_address.name, director.proof_of_address.file, 'application/pdf')
+                files[f'directors[{i}].proofOfAddressVerification'] = (director.proof_of_address.name, director.proof_of_address.file, get_content_type(director.proof_of_address))
             if director.id_card_front:
-                files[f'directors[{i}].idCardFront'] = (director.id_card_front.name, director.id_card_front.file, 'application/pdf')
+                files[f'directors[{i}].idCardFront'] = (director.id_card_front.name, director.id_card_front.file, get_content_type(director.id_card_front))
             if director.id_card_back:
-                files[f'directors[{i}].idCardBack'] = (director.id_card_back.name, director.id_card_back.file, 'application/pdf')
+                files[f'directors[{i}].idCardBack'] = (director.id_card_back.name, director.id_card_back.file, get_content_type(director.id_card_back))
         
         try:
             headers = {'Authorization': f'Bearer {self.token}'}
