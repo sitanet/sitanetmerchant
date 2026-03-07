@@ -295,36 +295,86 @@ def wallet_generate(request, corporate_pk):
                 if corporate.business_commencement_date and corporate.business_commencement_date > today:
                     validation_errors.append('Business Commencement Date cannot be in the future')
                 
-                # Corporate required documents
-                if not corporate.cac_certificate:
-                    missing_items.append('CAC Certificate')
-                if not corporate.scuml_certificate:
-                    missing_items.append('SCUML Certificate')
-                if not corporate.memart:
-                    missing_items.append('Memart Document')
-                if not corporate.tin_certificate:
-                    missing_items.append('TIN Certificate')
-                if not corporate.cac_status_report:
-                    missing_items.append('CAC Status Report')
-                if not corporate.board_resolution:
-                    missing_items.append('Board Resolution Letter')
-                if not corporate.utility_bill:
-                    missing_items.append('Utility Bill')
-                if not corporate.proof_of_address:
-                    missing_items.append('Proof of Address')
+                # Helper to check file extension
+                def is_pdf(file_field):
+                    return file_field and file_field.name.lower().endswith('.pdf')
                 
-                # Director required documents
+                def is_image(file_field):
+                    if not file_field:
+                        return False
+                    name = file_field.name.lower()
+                    return name.endswith(('.jpg', '.jpeg', '.png'))
+                
+                def is_pdf_or_image(file_field):
+                    return is_pdf(file_field) or is_image(file_field)
+                
+                # Corporate required documents with format validation
+                # PDF only documents
+                if not corporate.cac_certificate:
+                    missing_items.append('CAC Certificate (PDF)')
+                elif not is_pdf(corporate.cac_certificate):
+                    validation_errors.append('CAC Certificate must be PDF format')
+                
+                if not corporate.scuml_certificate:
+                    missing_items.append('SCUML Certificate (PDF)')
+                elif not is_pdf(corporate.scuml_certificate):
+                    validation_errors.append('SCUML Certificate must be PDF format')
+                
+                if not corporate.memart:
+                    missing_items.append('Memart Document (PDF)')
+                elif not is_pdf(corporate.memart):
+                    validation_errors.append('Memart Document must be PDF format')
+                
+                if not corporate.cac_status_report:
+                    missing_items.append('CAC Status Report (PDF)')
+                elif not is_pdf(corporate.cac_status_report):
+                    validation_errors.append('CAC Status Report must be PDF format')
+                
+                if not corporate.board_resolution:
+                    missing_items.append('Board Resolution Letter (PDF)')
+                elif not is_pdf(corporate.board_resolution):
+                    validation_errors.append('Board Resolution Letter must be PDF format')
+                
+                # PDF or Image documents
+                if not corporate.tin_certificate:
+                    missing_items.append('TIN Certificate (PDF/JPG/PNG)')
+                elif not is_pdf_or_image(corporate.tin_certificate):
+                    validation_errors.append('TIN Certificate must be PDF, JPG, or PNG format')
+                
+                if not corporate.utility_bill:
+                    missing_items.append('Utility Bill (PDF/JPG/PNG)')
+                elif not is_pdf_or_image(corporate.utility_bill):
+                    validation_errors.append('Utility Bill must be PDF, JPG, or PNG format')
+                
+                if not corporate.proof_of_address:
+                    missing_items.append('Proof of Address (PDF/JPG/PNG)')
+                elif not is_pdf_or_image(corporate.proof_of_address):
+                    validation_errors.append('Proof of Address must be PDF, JPG, or PNG format')
+                
+                # Director required documents with format validation
                 for director in directors:
                     if not director.bvn:
                         missing_items.append(f'Director {director.full_name}: BVN')
                     if not director.nin:
                         missing_items.append(f'Director {director.full_name}: NIN')
+                    
+                    # Passport Photo - Image only
                     if not director.passport_photo:
-                        missing_items.append(f'Director {director.full_name}: Passport Photo')
+                        missing_items.append(f'Director {director.full_name}: Passport Photo (JPG/PNG)')
+                    elif not is_image(director.passport_photo):
+                        validation_errors.append(f'Director {director.full_name}: Passport Photo must be JPG or PNG format')
+                    
+                    # ID Card Front - PDF or Image
                     if not director.id_card_front:
-                        missing_items.append(f'Director {director.full_name}: ID Card Front')
+                        missing_items.append(f'Director {director.full_name}: ID Card Front (PDF/JPG/PNG)')
+                    elif not is_pdf_or_image(director.id_card_front):
+                        validation_errors.append(f'Director {director.full_name}: ID Card Front must be PDF, JPG, or PNG format')
+                    
+                    # Proof of Address - PDF or Image
                     if not director.proof_of_address:
-                        missing_items.append(f'Director {director.full_name}: Proof of Address')
+                        missing_items.append(f'Director {director.full_name}: Proof of Address (PDF/JPG/PNG)')
+                    elif not is_pdf_or_image(director.proof_of_address):
+                        validation_errors.append(f'Director {director.full_name}: Proof of Address must be PDF, JPG, or PNG format')
                 
                 if missing_items:
                     messages.error(request, f'Missing required items: {", ".join(missing_items)}')
@@ -358,7 +408,7 @@ def wallet_generate(request, corporate_pk):
         except Exception as e:
             messages.error(request, f'Error: {str(e)}')
     
-    # Check missing documents for display
+    # Check missing documents for display with format requirements
     missing_corporate_docs = []
     missing_director_docs = []
     
@@ -367,21 +417,21 @@ def wallet_generate(request, corporate_pk):
     if not corporate.registration_number:
         missing_corporate_docs.append('Registration Number (RC/BN)')
     if not corporate.cac_certificate:
-        missing_corporate_docs.append('CAC Certificate')
+        missing_corporate_docs.append('CAC Certificate (PDF)')
     if not corporate.scuml_certificate:
-        missing_corporate_docs.append('SCUML Certificate')
+        missing_corporate_docs.append('SCUML Certificate (PDF)')
     if not corporate.memart:
-        missing_corporate_docs.append('Memart Document')
+        missing_corporate_docs.append('Memart Document (PDF)')
     if not corporate.tin_certificate:
-        missing_corporate_docs.append('TIN Certificate')
+        missing_corporate_docs.append('TIN Certificate (PDF/JPG/PNG)')
     if not corporate.cac_status_report:
-        missing_corporate_docs.append('CAC Status Report')
+        missing_corporate_docs.append('CAC Status Report (PDF)')
     if not corporate.board_resolution:
-        missing_corporate_docs.append('Board Resolution Letter')
+        missing_corporate_docs.append('Board Resolution Letter (PDF)')
     if not corporate.utility_bill:
-        missing_corporate_docs.append('Utility Bill')
+        missing_corporate_docs.append('Utility Bill (PDF/JPG/PNG)')
     if not corporate.proof_of_address:
-        missing_corporate_docs.append('Proof of Address')
+        missing_corporate_docs.append('Proof of Address (PDF/JPG/PNG)')
     
     for director in directors:
         director_missing = []
@@ -390,11 +440,11 @@ def wallet_generate(request, corporate_pk):
         if not director.nin:
             director_missing.append('NIN')
         if not director.passport_photo:
-            director_missing.append('Passport Photo')
+            director_missing.append('Passport Photo (JPG/PNG)')
         if not director.id_card_front:
-            director_missing.append('ID Card Front')
+            director_missing.append('ID Card Front (PDF/JPG/PNG)')
         if not director.proof_of_address:
-            director_missing.append('Proof of Address')
+            director_missing.append('Proof of Address (PDF/JPG/PNG)')
         if director_missing:
             missing_director_docs.append({'name': director.full_name, 'missing': director_missing})
     
