@@ -277,6 +277,7 @@ def wallet_generate(request, corporate_pk):
                 # Submit new corporate account to 9PSB
                 # Validate required fields and documents
                 missing_items = []
+                validation_errors = []
                 
                 # Corporate required fields
                 if not directors.exists():
@@ -285,6 +286,18 @@ def wallet_generate(request, corporate_pk):
                     missing_items.append('Tax Identification Number (TIN)')
                 if not corporate.registration_number:
                     missing_items.append('Registration Number (RC/BN)')
+                
+                # Validate TIN format (should contain hyphen, e.g., 12345678-0001)
+                if corporate.tax_identification_number and '-' not in corporate.tax_identification_number:
+                    validation_errors.append('TIN format should be like 12345678-0001 (with hyphen)')
+                
+                # Validate dates
+                from datetime import date
+                today = date.today()
+                if corporate.date_incorporated and corporate.date_incorporated > today:
+                    validation_errors.append('Date Incorporated cannot be in the future')
+                if corporate.business_commencement_date and corporate.business_commencement_date > today:
+                    validation_errors.append('Business Commencement Date cannot be in the future')
                 
                 # Corporate required documents
                 if not corporate.cac_certificate:
@@ -319,6 +332,9 @@ def wallet_generate(request, corporate_pk):
                 
                 if missing_items:
                     messages.error(request, f'Missing required items: {", ".join(missing_items)}')
+                elif validation_errors:
+                    for error in validation_errors:
+                        messages.error(request, error)
                 else:
                     # Set contact person from primary director if not set
                     primary_director = directors.filter(is_primary=True).first() or directors.first()
